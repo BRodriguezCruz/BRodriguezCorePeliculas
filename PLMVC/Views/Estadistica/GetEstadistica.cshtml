@@ -1,0 +1,179 @@
+﻿@model ML.Cine
+@{
+    ViewData["Title"] = "Estadistica";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Estadistica</h1>
+
+<html>
+<head>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script>
+        (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
+            ({ key: "AIzaSyCSKBDdPPlfca_zTwyxKiicRQn1qfgRjLw", v: "weekly" });
+    </script>
+</head>
+
+<body>
+    <style type="text/css">
+        /* Set the size of the div element that contains the map */
+        #map {
+            height: 400px; /* The height is 400 pixels */
+            width: 100%; /* The width is the width of the web page */
+        }
+    </style>
+
+    <!--The div element for the map -->
+    <div id="map"></div>
+    <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+
+    <script src="https://cdn.canvasjs.com/jquery.canvasjs.min.js"></script>
+</body>
+</html>
+
+@section Scripts    {
+    <script type="text/javascript">
+        // Initialize and add the map
+        async function initMap() { //inicio initMap
+
+           //LOCALIZAR DIRECCION Y UBICARTE EN BASE A LA DIRECCION DEL UPDATE
+           //LIBRERIAS REQUERIDAS
+            const { Map } = await google.maps.importLibrary("maps");
+            const { AdvancedMarkerView } = await google.maps.importLibrary("marker");
+
+            // The location of Uluru
+            const position = { lat: 19.430570307662446, lng: -99.16166352568936 };
+            // The map, centered at Uluru
+            let map = new Map(document.getElementById("map"), {
+                zoom: 8,
+                center: position,
+                mapId: "DEMO_MAP_ID",
+            });
+
+            window.addEventListener("load", function () {
+                @foreach (ML.Cine registro in Model.Cines)
+                {
+                    var direccion = registro.Direccion;
+                    var nombre = registro.Nombre;
+                    var ventas = registro.Ventas;
+                    var zona = registro.Zona.Nombre;
+                    if (direccion != null)
+                    {
+                        <text>address('@direccion', '@nombre','@ventas','@zona'); </text>
+                    }
+                }
+
+             });
+            function address (dir, nombre, ventas, zona)
+            {
+                let geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ 'address': dir }, function (results, status) 
+                {
+                    if (status === 'OK') 
+                    {
+                        let resultados = results[0].geometry.location,
+                             resultados_lat = resultados.lat(),
+                             resultados_long = resultados.lng();
+
+                        let infoWindow = new google.maps.InfoWindow({
+                            content: '<div id="bodyContent">' +
+                                '<h3 id="firstHeading" class="firstHeading">Datos</h3>' +
+                                "<b>Nombre: </b>" + nombre + "<br/>" +
+                                "<b>Ventas: </b>" + ventas + "<br/>" +
+                                "<b>Zona: </b>" + zona + "<br/>" +
+                                "<b>Direccion: </b>" + dir + 
+                                '<div/>', // la "," debe ir ao desaparece el mapa 
+                        });
+
+                        let marker = new google.maps.Marker({
+                            map: map,
+                            position: results[0].geometry.location,
+                            title: nombre
+                        });
+
+                       // infoWindow = new google.maps.InfoWindow();
+                        google.maps.event.addListener(marker, 'click', function () {
+                            infoWindow.close();
+                            infoWindow.open(map, marker);
+                        });
+                        
+                        /*
+                        marker.addListener("click", () => {                            
+                            infoWindow.close();
+                            infoWindow.open({
+                                anchor: marker,
+                                map,
+                            });
+                        }); */
+                    }
+                });
+            }
+        }//fin initMap
+        initMap();
+// ------------------------------------------------ GRAFICA ------------------------------------------------
+        window.onload = function () {
+
+            var totalVentas = 0;
+            var ventaNorte = 0;
+            var ventaSur = 0;
+            var ventaEste = 0;
+            var ventaOeste = 0;
+
+            @foreach(ML.Cine registro in Model.Cines)
+            {
+                  <text> totalVentas += @registro.Ventas; </text>
+
+                    if(registro.Zona.IdZona == 1)
+                    {
+                        <text> ventaNorte += @registro.Ventas; </text>
+                    }       
+                    if (registro.Zona.IdZona == 2)
+                    {
+                        <text> ventaSur += @registro.Ventas; </text>
+                    }
+                    if (registro.Zona.IdZona == 3)
+                    {
+                        <text> ventaEste += @registro.Ventas; </text>
+                    }
+                    if (registro.Zona.IdZona == 4)
+                    {
+                        <text> ventaOeste += @registro.Ventas; </text>
+                    }                   
+            }
+
+            var porcentajeNorte = (ventaNorte / totalVentas) * 100;
+            var porcentajeSur = (ventaSur / totalVentas) * 100;
+            var porcentajeEste = (ventaEste / totalVentas) * 100;
+            var porcentajeOeste = (ventaOeste / totalVentas) * 100;
+
+            var options = {
+	            title: {
+		            text: "GRAFICACION DE LAS VENTAS POR ZONA"
+	            },
+	            subtitles: [{
+		            text: "As of November, 2017"
+	            }],
+	            animationEnabled: true,
+	            data: [{
+		            type: "pie",
+		            startAngle: 40,
+		            toolTipContent: "<b>{label}</b>: {y}%",
+		            showInLegend: "true",
+		            legendText: "{label}",
+		            indexLabelFontSize: 16,
+		            indexLabel: "{label} - {y}%",
+		            dataPoints: [
+			            { y: porcentajeNorte , label: "Norte" },
+                        { y: porcentajeSur, label: "Sur" },
+                        { y: porcentajeEste, label: "Este" },
+                        { y: porcentajeOeste, label: "Oeste" }
+		            ]
+	            }]
+            };
+            $("#chartContainer").CanvasJSChart(options);
+
+            }
+    </script>
+}
+

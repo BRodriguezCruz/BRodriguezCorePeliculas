@@ -1,0 +1,31 @@
+﻿@model ML.Usuario
+@{
+    ViewData["Title"] = "UpdatePassword";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RESTABLECE TU CONTRASEÑA</title>
+    <link rel="stylesheet" type="text/css" href="~/css/Register.css" />
+</head>
+<body> 
+    <br />
+    <h3>RESTABLECE TU CONTRASEÑA</h3>
+    <hr />
+    <div class="log-form">
+        @using (Html.BeginForm("SendEmail", "Usuario", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {           
+              <h2>Ingresa tu datos</h2>
+              <p>Ingresa tus datos de email para recibir un mensaje y poder restablecer tu contraseña </p>
+
+            @Html.TextBoxFor(model => model.Email, new {@class = "form-control", @type = "text", @placeholder = "INGRESA TU CORREO ELECTRONICO", @required = "required"})
+            <button type="submit" class="btn">Enviar</button>
+            <a href="@Url.Action("Login","Usuario")" class="forgot">VOLVER</a>
+        }
+    </div>
+</body>
+
+</html>
+

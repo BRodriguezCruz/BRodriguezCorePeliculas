@@ -1,0 +1,88 @@
+﻿@model ML.Venta
+@{
+    ViewData["Title"] = "Carrito";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Carrito</h1>
+
+@if(Model.Carrito.Count != 0)
+{
+    <div class="table-responsive">
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>ID PRODUCTO</th>
+                    <th>NOMBRE</th>
+                    <th>PRECIO</th>
+                    <th>CANTIDAD</th>
+                    <th>IMAGEN</th>
+                    <th>SUBTOTAL</th>
+                    <th>AGREGAR</th>
+                    <th>ELIMINAR</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (ML.Dulceria registro in Model.Carrito)
+                {
+                    <tr>
+                        <td>@registro.IdDulceria</td>
+                        <td>@registro.Nombre</td>
+                        <td>@registro.Precio</td>
+                        <td>@registro.Cantidad</td>
+                        <td> <img src="data:image/*;base64,@registro.Imagen" width="70" height="70" class="rounded-circle" /> </td>
+                        <td>@(registro.Cantidad * registro.Precio)</td>
+                        <td> <a href="@Url.Action("AddorDeleteAmount","Dulceria", new {idProducto = registro.IdDulceria, aumentarOdisminuir = true})" class="btn btn-success">AGREGAR</a> </td>
+                        <td> <a href="@Url.Action("AddorDeleteAmount","Dulceria", new {idProducto = registro.IdDulceria, aumentarOdisminuir = false})" class="btn btn-danger" onclick="return confirm('¿Seguro que quieres eliminar el registro?')">ELIMINAR</a> </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <p class="alert alert-danger">EL TOTAL ES DE $: <input type="text" id="lblTotal" disabled/> </p>
+        </div>
+    </div>   
+    <div class="row">
+        <div class="col-md-4">
+            <a href="@Url.Action("AddCarrito","Dulceria", new {limpiar = true})" class="btn btn-outline-info">LIMPIAR CARRITO</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning" role="alert">
+        NO HAY NADA AGREGADO AL CARRITO AUN
+    </div>
+}
+
+<!-- 
+    examen #4 Leeken Group
+    nueva solucion en blanco BRodriguezLeenkenGroup
+        NET FRAMEWORK ->
+            punto 1 y 2 una hora para ambos. (consola)
+            punto 3 PAUSAR
+            para punto 4 (ML,BL,SL)  ENTITY FRAMEWORK (con LINQ)
+-->
+@section Scripts {
+    <script type="text/javascript">
+
+            var subTotal = 0;
+            var total = 0;
+
+            @foreach (ML.Dulceria registro in Model.Carrito)
+            {
+                <text> subTotal = (@registro.Cantidad * @registro.Precio); </text>
+                <text> total = total + subTotal; </text>
+                
+            }
+
+            $(document).ready(function()
+            {
+                $("#lblTotal").val(total);
+            });
+
+
+    </script>
+}

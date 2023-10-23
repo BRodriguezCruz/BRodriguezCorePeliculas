@@ -1,0 +1,61 @@
+﻿@model Pelicula
+@{
+    ViewData["Title"] = "GetAllFavorite";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1></h1>
+
+<link rel="stylesheet" type="text/css" href="~/css/cardPelicula.css" />
+
+<div style="background: url(https://bootstrapious.com/i/snippets/sn-static-header/background.jpg)" class="jumbotron bg-cover text-white">
+    <div class="container py-5 text-center">
+        <h1 class="display-4 font-weight-bold">TUS PELICULAS FAVORITAS</h1>
+        <p class="font-italic mb-0">Estas en tus pelicualas favoritas</p>
+
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </li>
+            </ul>
+    </div>
+</div>
+<br />
+
+
+<div class="row">
+    @foreach (Pelicula registro in Model.Peliculas)
+    {
+        <div class="col-md-6">
+            <div class="card">
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face@(registro.poster_path)" alt="" />
+                <div class="card-content">
+                    <h2>
+                        @registro.title
+                    </h2>
+                    <p>
+                        @registro.overview
+                    </p>
+                    <a href="@Url.Action("Favorite","Pelicula", new {idPelicula = registro.id, fav = false})" class="btn btn-danger">
+                        <i class="bi bi-star-fill"></i>
+                         QUITAR
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

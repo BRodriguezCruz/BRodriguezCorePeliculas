@@ -1,0 +1,23 @@
+﻿@model ML.Usuario
+@{
+    ViewData["Title"] = "AddUser";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" type="text/css" href="~/css/Register.css" />
+
+<h1>¡HOLA!</h1>
+
+<div class="log-form">
+    <h2>Ingresa tu datos</h2>
+    @using (Html.BeginForm("AddUser", "Usuario", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.TextBoxFor(model => model.Nombre, new {@class = "form-control", @type = "text", @placeHolder = "Nombre", @required="required"})
+        @Html.TextBoxFor(model => model.UserName, new {@class = "form-control", @type = "text", @placeHolder = "Nombre de Usuario", @required="required"})
+        @Html.TextBoxFor(model => model.Email, new {@class = "form-control", @type = "text", @placeHolder = "Correo Electronico", @required="required"})
+        @Html.TextBoxFor(model => model.Password, new {@class = "form-control", @type = "text", @placeHolder = "Contraseña", @required="required"})
+
+            <button type="submit" class="btn">REGISTRAR</button>
+             <a class="forgot" href="@Url.Action("Login","Usuario")">VOLVER</a>
+    }
+</div><!--end log form -->

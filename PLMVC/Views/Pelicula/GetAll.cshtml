@@ -1,0 +1,67 @@
+﻿@model Pelicula
+@{
+    ViewData["Title"] = "GetAll";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!-- <h1 style="text-align: center">PELICULAS MAS POPULARES</h1> -->
+<br />
+<link rel="stylesheet" type="text/css" href="~/css/cardPelicula.css" />
+
+<div style="background: url(https://bootstrapious.com/i/snippets/sn-static-header/background.jpg)" class="jumbotron bg-cover text-white">
+    <div class="container py-5 text-center">
+        <h1 class="display-4 font-weight-bold">PELICULAS MAS POPULARES</h1>
+        <p class="font-italic mb-0">Aqui podras observar las peliculas con mayor exito en audiencia,disfrutalo</p>
+
+        <nav aria-label="Page navigation example" class="justify-content-center">
+                <ul class="pagination">
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+        <a href="#" role="button" class="btn btn-primary px-5">See All Features</a>
+    </div>
+</div>
+
+
+<div class="row">
+    @foreach (Pelicula registro in Model.Peliculas)
+    {
+        <div class="col-md-6">
+            <div class="card">
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face@(registro.poster_path)" alt="" />
+                <div class="card-content">
+                    <h2>
+                        @registro.title
+                    </h2>
+                    <p>
+                        @registro.overview
+                    </p>
+                    <a href="@Url.Action("Favorite","Pelicula", new {idPelicula = registro.id, fav = true})" class="btn btn-danger">
+                        <i class="bi bi-star-fill"></i>
+                        Favoritos
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+<!-- <img src="https://image.tmdb.org/t/p/w220_and_h330_face + registro.poster_path" alt=""> -->
+<!-- script type="text/javascript" src="~/js/cardPelicula.js"> </!-->

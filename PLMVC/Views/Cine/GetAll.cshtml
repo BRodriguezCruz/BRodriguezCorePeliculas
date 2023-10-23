@@ -1,0 +1,43 @@
+﻿@model ML.Cine
+@{
+    ViewData["Title"] = "GetAll";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>CINES</h1>
+<hr />
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+                <th>EDITAR</th>
+                <th>ID CINE</th>
+                <th>NOMBRE</th>
+                <th>DIRECCION</th>
+                <th>VENTAS</th>
+                <th>ID ZONA</th>
+                <th>ZONA</th>
+                <th>ELIMINAR</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(ML.Cine registro in Model.Cines)
+            {
+                <tr>
+                    <td> <a href="@Url.Action("Form","Cine", new {idCine = registro.IdCine})" class="btn btn-warning">EDITAR</a> </td>
+                    <td>@registro.IdCine</td>
+                    <td>@registro.Nombre</td>
+                    <td>@registro.Direccion</td>
+                    <td>@registro.Ventas</td>
+                    <td>@registro.Zona.IdZona</td>
+                    <td>@registro.Zona.Nombre</td>
+                    <td> <a href="@Url.Action("","", new {idCine = registro.IdCine})" class="btn btn-danger" onclick="return confirm('¿Seguro que quieres eliminar el registro?')">ELIMINAR</a> </td>                    
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<a href="@Url.Action("GetAll","Pelicula")" class="btn btn-warning">Ver Cartelera</a>
+<a href="@Url.Action("Form","Cine")" class="btn btn-success">Agregar Cine</a>
+
