@@ -114,9 +114,9 @@ namespace PLMVC.Controllers
         [HttpPost]
         public IActionResult SendEmail(string email)
         {
-            if (HttpContext.Session.GetString("Correo") != null)
-            {
-                HttpContext.Session.Remove("Correo"); //Limpia la session
+            //if (HttpContext.Session.GetString("Correo") == null)
+            //{
+                //HttpContext.Session.Remove("Correo"); //Limpia la session
 
                 ML.Result result = BL.Usuario.GetByEmail(email);
 
@@ -129,7 +129,7 @@ namespace PLMVC.Controllers
                     {
                         string emailOrigen = "brodriguezc14@gmail.com";
 
-                        MailMessage mailMessage = new MailMessage(emailOrigen, email, "Recuperar Contraseña", "<p>Correo para recuperar contraseña</p>");
+                        MailMessage mailMessage = new MailMessage(emailOrigen, email, "Recupera tu Contraseña", "<p>Correo para recuperar contraseña</p>");
                         mailMessage.IsBodyHtml = true;
 
                         //string contenidoHTML = System.IO.File.ReadAllText(@"C:\users\digis\Documents\IISExpress\Leonardo Escogido Bravo\Proyecto2023Ecommerce\PL\Views\Usuario\Email.html");
@@ -141,7 +141,7 @@ namespace PLMVC.Controllers
 
                         mailMessage.Body = contenidoHTML;
                         //string url = "http://localhost:5057/Usuario/NewPassword/" + HttpUtility.UrlEncode(email);
-                        string url = "http://localhost:5016/Usuario/UpdatePassword/" + HttpUtility.UrlEncode(email);
+                        string url = "http://localhost:5016/Usuario/UpdatePassword?email=" + HttpUtility.UrlEncode(email);
                         mailMessage.Body = mailMessage.Body.Replace("{Url}", url);
                         SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
                         smtpClient.EnableSsl = true;
@@ -153,7 +153,7 @@ namespace PLMVC.Controllers
                         smtpClient.Dispose();
 
                         //ViewBag.Modal = "show";
-                        HttpContext.Session.SetString("Correo", Newtonsoft.Json.JsonConvert.SerializeObject(email));
+                       // HttpContext.Session.SetString("Correo", Newtonsoft.Json.JsonConvert.SerializeObject(email));
                         ViewBag.Message = "Se ha enviado un correo de confirmación a tu correo electronico";
                         ViewBag.Login = true;
                     }
@@ -168,33 +168,42 @@ namespace PLMVC.Controllers
                     ViewBag.Message = "Ocurrio un error inesperado, por favor intenta nuevamente";
                     ViewBag.Login = true;
                 }
-            }
-            else
+            //}
+            /*else
             {
                 ViewBag.Message = "Ocurrio un error inesperado, por favor intenta nuevamente";
-            }
+            }*/
             return PartialView("Modal");
         }
 
         [HttpGet]
-        public ActionResult UpdatePassword()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public ActionResult UpdatePassword(string password)
+        public ActionResult UpdatePassword(string email)
         {
             ML.Usuario usuario = new ML.Usuario();
 
-            if (HttpContext.Session.GetString("Correo") != null)
-            {
-                //Convert the string into an array of bytes.
-                byte[] convertHexadecimal = Encoding.UTF8.GetBytes(password);
-                var correoDeserealizado = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(HttpContext.Session.GetString("Correo"));
+            usuario.Email = email;
 
-                usuario.Email = correoDeserealizado;
-                usuario.Password = convertHexadecimal;
+            return View(usuario);
+        }
+
+        [HttpPost]
+        public ActionResult UpdatePassword(string password, string email)
+        {
+            ML.Usuario usuario = new ML.Usuario();
+
+            //if (HttpContext.Session.GetString("Correo") != null)
+            //{         
+            /*var correoDeserealizado = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(HttpContext.Session.GetString("Correo"));
+
+            usuario.Email = correoDeserealizado;
+            usuario.Password = convertHexadecimal;*/
+
+           //Convert the string into an array of bytes.
+            byte[] convertHexadecimal = Encoding.UTF8.GetBytes(password);
+
+
+            usuario.Email = email;
+            usuario.Password = convertHexadecimal;
 
                 ML.Result result = BL.Usuario.UpdatePassword(usuario);
 
@@ -208,12 +217,12 @@ namespace PLMVC.Controllers
                     ViewBag.Message = "ERROR, NO SE HA ACTUALIZADO CORRECTAMENTE TU CONTRASEÑA, INTENTA NUEVAMENTE";
                     ViewBag.Login = true;
                 }
-            }
+            /*}
             else
             {
                 ViewBag.Message = "HUBO UN ERROR INESPERADO, NO SE ENCONTRO TU CORREO, INTENTA NUEVAMENTE";
                 ViewBag.Login = true;
-            }
+            }*/
 
             return PartialView("Modal");
         }

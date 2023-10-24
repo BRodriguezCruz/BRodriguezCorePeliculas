@@ -1,5 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿//using iTextSharp.text.pdf;
+//using iTextSharp.text;
+//using iTextSharp.tool.xml;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Win32;
+using HtmlAgilityPack;
+using System.Text;
+using ML;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using iText.IO.Image;
+using iText.Kernel.Pdf;
 
 namespace PLMVC.Controllers
 {
@@ -79,7 +90,7 @@ namespace PLMVC.Controllers
                 else
                 {
                     ML.Dulceria dulceria = (ML.Dulceria)result.Object;
-                    Deserealizar(carrito); // recupera el carrito que ya estaba y desereaiza
+                    GetCarritoAndDeserealizar(carrito); // recupera el carrito que ya estaba y desereaiza
 
                     foreach (ML.Dulceria dulceria1 in carrito.Carrito)
                     {
@@ -111,7 +122,7 @@ namespace PLMVC.Controllers
             return RedirectToAction("GetAll"); //nombre del metodo al cual se va a redirigir
         }
 
-        public ML.Venta Deserealizar(ML.Venta carrito)
+        public ML.Venta GetCarritoAndDeserealizar(ML.Venta carrito)
         {
             var ventaSession = Newtonsoft.Json.JsonConvert.DeserializeObject<List<object>>(HttpContext.Session.GetString("Carrito"));
 
@@ -134,7 +145,7 @@ namespace PLMVC.Controllers
             }
             else
             {
-                Deserealizar(carrito);
+                GetCarritoAndDeserealizar(carrito);
                 return View(carrito);
             }
 
@@ -151,7 +162,7 @@ namespace PLMVC.Controllers
             if (result.Correct) //validamos el GetById
             {
                 dulceria = (ML.Dulceria)result.Object;
-                Deserealizar(carrito); // recupera el carrito que ya estaba y desereaiza
+                GetCarritoAndDeserealizar(carrito); // recupera el carrito que ya estaba y desereaiza
 
                 foreach (ML.Dulceria dulceria1 in carrito.Carrito)
                 {
@@ -213,6 +224,117 @@ namespace PLMVC.Controllers
                 }
             }
             return PartialView("Modal"); //nombre del metodo al cual se va a redirigir
+        }
+        /*
+        [HttpPost]
+        public FileResult Export(string ExportData) //inicialmente utilice ITEXTSHARP para que corriera y HTML AGILITY PARA EL 1ER BLOQUE (LAS librerias estan comentadas)
+        {
+            HtmlNode.ElementsFlags["img"] = HtmlElementFlag.Closed;
+            HtmlDocument doc = new HtmlDocument();
+            doc.OptionFixNestedTags = true;
+            doc.LoadHtml(ExportData);
+            ExportData = doc.DocumentNode.OuterHtml;
+
+            using (MemoryStream stream = new System.IO.MemoryStream())
+            {
+                StringReader reader = new StringReader(ExportData);
+                Document PdfFile = new Document(PageSize.A4);
+                PdfWriter writer = PdfWriter.GetInstance(PdfFile, stream);
+                PdfFile.Open();
+                XMLWorkerHelper.GetInstance().ParseXHtml(writer, PdfFile, reader);
+                PdfFile.Close();
+                return File(stream.ToArray(), "application/pdf", "ExportData.pdf");
+            }
+        }
+        
+       //ESTE METODO Y EL OTRO DE ARRIBA HACEN LO MISMO
+       [HttpPost]
+       public FileResult Export(string ExportData)
+       {
+           HtmlNode.ElementsFlags["img"] = HtmlElementFlag.Closed;
+           HtmlDocument doc = new HtmlDocument();
+           doc.OptionFixNestedTags = true;
+           doc.LoadHtml(ExportData);
+           ExportData = doc.DocumentNode.OuterHtml;
+
+           using (MemoryStream stream = new System.IO.MemoryStream())
+           {
+               Encoding unicode = Encoding.UTF8;
+               StringReader sr = new StringReader(ExportData);
+               Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 100f, 0f);
+               PdfWriter writer = PdfWriter.GetInstance(pdfDoc, stream);
+               pdfDoc.Open();
+               XMLWorkerHelper.GetInstance().ParseXHtml(writer, pdfDoc, sr);
+               pdfDoc.Close();
+               return File(stream.ToArray(), "application/pdf", "ExportData.pdf");
+           }
+       }*/
+
+        
+        public IActionResult GenerarPDF()
+        {
+            ML.Venta carrito = new ML.Venta();
+            carrito.Carrito = new List<object>();
+            GetCarritoAndDeserealizar(carrito);
+
+            // Crear un nuevo documento PDF en una ubicación temporal
+            string rutaTempPDF = Path.GetTempFileName() + ".pdf";
+
+            using (PdfDocument pdfDocument = new PdfDocument(new PdfWriter(rutaTempPDF)))
+            {
+                using (Document document = new Document(pdfDocument))
+                {
+                    document.Add(new Paragraph("DETALLES DE COMPRA:"));
+                    document.Add(new Paragraph(" "));
+
+                    // Crear la tabla para mostrar la lista de objetos
+                    Table table = new Table(6); // 5 columnas
+                    table.SetWidth(UnitValue.CreatePercentValue(100)); // Ancho de la tabla al 100% del documento
+
+                    // Añadir las celdas de encabezado a la tabla
+                    table.AddHeaderCell("ID Producto");
+                    table.AddHeaderCell("Producto");
+                    table.AddHeaderCell("Precio");
+                    table.AddHeaderCell("Cantidad");
+                    table.AddHeaderCell("Imagen");
+                    table.AddHeaderCell("SubTotal");
+
+                    decimal? total = 0;
+
+                    foreach (ML.Dulceria producto in carrito.Carrito)
+                    {
+                        table.AddCell(producto.IdDulceria.ToString());
+                        table.AddCell(producto.Nombre);
+                        table.AddCell(producto.Precio.ToString());
+                        table.AddCell(producto.Cantidad.ToString());
+                        byte[] imageBytes = Convert.FromBase64String(producto.Imagen);
+                        ImageData data = ImageDataFactory.Create(imageBytes);
+                        Image image = new Image(data);
+                        table.AddCell(image.SetWidth(50).SetHeight(50));
+                        table.AddCell((producto.Cantidad * producto.Precio).ToString());
+                        total += ((producto.Cantidad * producto.Precio));
+                    }
+
+                    // Añadir la tabla al documento
+                    document.Add(table);
+
+                    //Añadir el total de la compra 
+                    document.Add(new Paragraph(" "));
+                    document.Add(new Paragraph("El total de su compra fue:" + total));
+                }
+                // Leer el archivo PDF como un arreglo de bytes
+                byte[] fileBytes = System.IO.File.ReadAllBytes(rutaTempPDF);
+
+                // Eliminar el archivo temporal
+                System.IO.File.Delete(rutaTempPDF);
+                HttpContext.Session.Remove("Carrito");
+
+                // Descargar el archivo PDF
+                return new FileStreamResult(new MemoryStream(fileBytes), "application/pdf")
+                {
+                    FileDownloadName = "DetalleCompra.pdf"
+                };
+            }
         }
     }
 }

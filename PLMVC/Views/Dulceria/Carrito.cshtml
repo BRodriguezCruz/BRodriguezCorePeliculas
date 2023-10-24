@@ -8,7 +8,7 @@
 
 @if(Model.Carrito.Count != 0)
 {
-    <div class="table-responsive">
+    <div class="table-responsive" id="PrintPDF">
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
@@ -30,7 +30,7 @@
                         <td>@registro.Nombre</td>
                         <td>@registro.Precio</td>
                         <td>@registro.Cantidad</td>
-                        <td> <img src="data:image/*;base64,@registro.Imagen" width="70" height="70" class="rounded-circle" /> </td>
+                        <td>  <img src="data:image/*;base64,@registro.Imagen" width="70" height="70" class="rounded-circle"/>  </td>
                         <td>@(registro.Cantidad * registro.Precio)</td>
                         <td> <a href="@Url.Action("AddorDeleteAmount","Dulceria", new {idProducto = registro.IdDulceria, aumentarOdisminuir = true})" class="btn btn-success">AGREGAR</a> </td>
                         <td> <a href="@Url.Action("AddorDeleteAmount","Dulceria", new {idProducto = registro.IdDulceria, aumentarOdisminuir = false})" class="btn btn-danger" onclick="return confirm('¿Seguro que quieres eliminar el registro?')">ELIMINAR</a> </td>
@@ -48,6 +48,10 @@
         <div class="col-md-4">
             <a href="@Url.Action("AddCarrito","Dulceria", new {limpiar = true})" class="btn btn-outline-info">LIMPIAR CARRITO</a>
         </div>
+        <div class="col-md-4">
+            <!-- Button trigger modal -->
+            <button type="button" onclick="AbrirModal()" class="btn btn-outline-warning"> COMPRAR </button>
+        </div>
     </div>
 }
 else
@@ -56,16 +60,180 @@ else
         NO HAY NADA AGREGADO AL CARRITO AUN
     </div>
 }
+<!-- Modal 1-->
+<div class="modal fade" id="modalComprar" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header alert-info">
+        <h1 class="modal-title fs-5" id="exampleModalToggleLabel">TU COMPRA</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+         <form>
+             <div class="md-form mb-5">
+                 <input type="text" class="form-control validate" id="NombreCompleto" placeholder="Nombre Completo" />
+             </div>
+             <div class="md-form mb-5">
+                 <input type="text" class="form-control validate" id="txtNumeroTarjeta" placeholder="Numero de Tarjeta" />
+             </div>
+             <div class="md-form mb-5">
+                  <div class="row">
+                       <div class="col-md-6">
+                           <input type="text" class="form-control" id="txtCvv" placeholder="CVV" />                            
+                       </div>
+                       <div class="col-md-6">
+                            <input type="text" class="form-control" id="txtAño" placeholder="Año" />
+                       </div>
+                  </div>                      
+             </div>
+             <div class="md-form mb-5p">
+                    <div class="col-md-6"> 
+                        <input type="text" class="form-control" id="txtTotal" placeholder="TOTAL" />
+                   </div>
+             </div>
+         </form>
+      </div>
+      <div class="modal-footer">
+            <button type="button" class="btn btn-info" data-bs-dismiss="modal">CERRAR</button>
+            <a onclick="ModalCompra()" class="btn btn-success"> COMPRAR</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!--Modal 2-->
+<div class="modal fade" id="modalConfirmar" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header alert-success">
+        <h1 class="modal-title fs-5" id="exampleModalToggleLabel2">¡DISFRUTA DE TUS ALIMENTOS!</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div>
+            <h2 class="text-center">¡LISTO, TU COMPRA SE HA REALIZADO!</h2>
+         </div>
+         <div>
+            Ahora descarga tu detalle de compra y presentalo en taquilla.
+         </div>
+        <br />
+        <div class="text-center">
+            <img src="https://imgs.search.brave.com/03qiq3ZF4PI1SBN8jx8DxtbmS_nx9LD2b6aMk3wGQXg/rs:fit:860:0:0/g:ce/aHR0cHM6Ly93d3cu/c2Vla3BuZy5jb20v/cG5nL2RldGFpbC8z/NTMtMzUzNDY3OV9i/aWVuLWhlY2hvLXBu/Zy1wYWxvbWEtY2hl/Y2stcG5nLnBuZw" height="200" width="200" class="rounded-circle" />
+        </div>
+      </div>
+     @* ESTE BEGIN FORM SE USA PARA PASAR A PDF UN ELEMENTO DEL HTML COMPLETO, POR ESO ES QUE ARRIBA SE DIO UN "ID" A UNA ETIQUETA DIV 
+         QUE SE MANDA A UN METODO EN EL CONTROLADOR 
+         @using (Html.BeginForm("Export", "Dulceria", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+      <hr />
+      <div class="modal-footer">
+            <input type="hidden" name="ExportData" />
+            <input type="submit" id="btnSubmit" value="DESCARGAR PDF" class="btn btn-danger"/>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+        }
+     *@
+    <div class="modal-footer">
+       <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Salir</button>
+       <a href="@Url.Action("GenerarPDF")" class="btn btn-danger"><i class="fa-solid fa-file-pdf"></i> DESCARGAR PDF</a>
+     </div>
+    </div>
+  </div>
+</div>
 
-<!-- 
-    examen #4 Leeken Group
-    nueva solucion en blanco BRodriguezLeenkenGroup
-        NET FRAMEWORK ->
-            punto 1 y 2 una hora para ambos. (consola)
-            punto 3 PAUSAR
-            para punto 4 (ML,BL,SL)  ENTITY FRAMEWORK (con LINQ)
+
+<!-- MODAL TOMADO DE MODELO PARA EL MODAL 2 DE ARRIBA
+    <div class="modal fade " id="ModalCompra" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header alert-success">
+                    <h5 class="modal-title" id="exampleModalLabel">Completado! <i class="fa-solid fa-check"></i></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row text-center">
+                        <h2 class="text-center">Tu pedido esta en proceso!</h2>
+                        <img src="https://cdn.pixabay.com/animation/2022/11/10/13/26/13-26-03-556_512.gif" width="50" height="520"/>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                    <a href="@Url.Action("GenerarPDF")" id="btnGuardar" class="btn btn-dark"><i class="fa-solid fa-file-pdf"></i> Resumen</a>
+                </div>
+            </div>
+        </div>
+     </div>
+
 -->
+@*
+---- MODAL TOMADO DE MODELO PARA EL MODAL 1 DE ARRIBA
+    <div class="modal fade " id="Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            @using (Html.BeginForm("Index", "Producto", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div class="modal-content">
+                    <div class="modal-header alert-secondary">
+                        <h5 class="modal-title" id="exampleModalLabel">Termina tu compra</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row text-center">
+                            <div class="col-md-6">
+                                @Html.Label("Numero de Tarjeta")
+                                <div class="input-group ">
+                                    <span class="input-group-text" id="addonStock"><i class="fa-brands fa-cc-visa"></i></span>
+                                    <input type="text" class="form-control" />
+                                </div>
+                                @Html.Label("", null, new { @id = "lblStock" })
+                            </div>
+                            <div class="col-md-3">
+                                @Html.Label("CVV")
+                                <div class="input-group ">
+                                    <span class="input-group-text" id="addonStock">CVV</span>
+                                    <input type="text" class="form-control" />
+                                </div>
+                                @Html.Label("", null, new { @id = "lblStock" })
+                            </div>
+                            <div class="col-md-3">
+                                @Html.Label("Vencimiento")
+                                <div class="input-group ">
+                                    <span class="input-group-text" id="addonStock"><i class="fa-regular fa-calendar"></i></span>
+                                    <input type="month" class="form-control" />
+                                </div>
+                                @Html.Label("", null, new { @id = "lblStock" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Direccion</label>
+                                <input class="form-control col-md-12" id="txtDireccion" type="text" disabled />
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <h2 class="text-center">Ingresa Tu Direccion</h2>
+                            <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+                            <div id="map"></div>
+
+                            <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCSKBDdPPlfca_zTwyxKiicRQn1qfgRjLw&callback=initMap&libraries=&v=weekly&sensor=false" defer></script>
+
+                        </div>
+
+                        <br />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                        <a onclick="ModalCompra()" id="btnGuardar" class="btn btn-dark"><i class="fa-solid fa-truck"></i> Pedir</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+*@
+
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script type="text/javascript">
 
             var subTotal = 0;
@@ -82,7 +250,23 @@ else
             {
                 $("#lblTotal").val(total);
             });
+// ------------------------------------------------------------- PDF (CONVERTIR ELEMENTOS HTML A PDF)
 
+            //Funcion para pasar los datos de la tabla HTML al controldor y convertir en PDF en el controlador
+            $(function () {
+                $("#btnSubmit").click(function () {
+                    $("input[name='ExportData']").val($("#PrintPDF").html());
+                });
+            });
+// ------------------------------------------------------------- MODAL´S
+            function AbrirModal() {
+                $('#modalComprar').modal('show');
+            }
+
+            function ModalCompra() {
+                $('#modalComprar').modal('hide');
+                $('#modalConfirmar').modal('show');
+            }
 
     </script>
 }
